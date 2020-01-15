@@ -76,7 +76,6 @@ namespace eidng8.SpaceFlight.Managers
         )]
         private static void LateSetupScene() {
             Debug.Log($"LateSetupScene {Time.realtimeSinceStartup}");
-            GameManager.CreateShip();
         }
 
         /// <summary>
