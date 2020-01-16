@@ -8,9 +8,12 @@
 // ---------------------------------------------------------------------------
 
 using System.IO;
+using eidng8.SpaceFlight.Components;
 using eidng8.SpaceFlight.Configurable.Ship;
 using eidng8.SpaceFlight.Configurable.System;
 using eidng8.SpaceFlight.Entities;
+using eidng8.SpaceFlight.Systems.Jobs;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -50,19 +53,21 @@ namespace eidng8.SpaceFlight.Managers
             return Path.Combine("Prefabs", file);
         }
 
-        public static GameObject CreateShip() {
-            Debug.Log($"GameObject creating {Time.realtimeSinceStartup}");
-            var cfg = Resources.Load<ShipConfig>(
-                GameManager.DataFilePath("Ships/Crosair")
-            );
-            GameObject go = Object.Instantiate(new GameObject());
-            var pe = go.AddComponent<PrefabEntity>();
-            pe.prefab = cfg.prefab;
-            go.AddComponent<ConvertToEntity>();
-            Debug.Log($"GameObject created {Time.realtimeSinceStartup}");
-            return go;
+        public static void CreateShip() {
+            NativeArray<PrefabComponent> pc = World.Active.EntityManager
+                .CreateEntityQuery(
+                    new ComponentType[] {
+                        ComponentType.ReadOnly<PrefabComponent>()
+                    }
+                )
+                .ToComponentDataArray<PrefabComponent>(Allocator.TempJob);
+            foreach (PrefabComponent c in pc)
+            {
+                PrefabSpawningJob.Spawn(c);
+            }
+            // pc.Dispose();
         }
-        
+
         /// <summary>Path to the file in the persistent storage.</summary>
         /// <param name="file"></param>
         /// <returns></returns>

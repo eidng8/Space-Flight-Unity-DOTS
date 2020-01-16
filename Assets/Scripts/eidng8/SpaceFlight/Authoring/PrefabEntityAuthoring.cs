@@ -3,9 +3,11 @@ using eidng8.SpaceFlight.Components;
 using Unity.Entities;
 using UnityEngine;
 
-namespace eidng8.SpaceFlight.Entities
+namespace eidng8.SpaceFlight.Authoring
 {
-    public class PrefabEntity
+    [RequiresEntityConversion]
+    [AddComponentMenu("eidng8/Authoring/Prefab")]
+    public class PrefabEntityAuthoring
         : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
     {
         public GameObject prefab;
@@ -15,19 +17,19 @@ namespace eidng8.SpaceFlight.Entities
             EntityManager dstManager,
             GameObjectConversionSystem conversionSystem
         ) {
-            Debug.Log($"Convert {Time.realtimeSinceStartup}");
-            Entity prefabEntity =
-                conversionSystem.GetPrimaryEntity(this.prefab);
-            MovableComponent data = new MovableComponent() {
-                entity = prefabEntity
+            if (null == this.prefab) { return; }
+
+            PrefabComponent data = new PrefabComponent() {
+                prefab = conversionSystem.GetPrimaryEntity(this.prefab),
             };
             dstManager.AddComponentData(entity, data);
-            Debug.Log($"Convert done {Time.realtimeSinceStartup}");
         }
 
         public void DeclareReferencedPrefabs(
             List<GameObject> referencedPrefabs
         ) {
+            if (null == this.prefab) { return; }
+
             referencedPrefabs.Add(this.prefab);
         }
     }
