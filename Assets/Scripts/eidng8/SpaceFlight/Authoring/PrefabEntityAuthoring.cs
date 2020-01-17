@@ -6,14 +6,36 @@ using UnityEngine;
 
 namespace eidng8.SpaceFlight.Authoring
 {
+    /// <summary>
+    ///     Converts prefab to entity.
+    /// </summary>
     [RequiresEntityConversion]
     [AddComponentMenu("eidng8/Authoring/Prefab")]
     public class PrefabEntityAuthoring
         : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
     {
-        public PrefabTypes type;
-        
+        /// <summary>
+        ///     The prefab to be converted.
+        /// </summary>
+        [Tooltip("The prefab to be converted.")]
         public GameObject prefab;
+
+        /// <summary>
+        ///     This is used to bridge between prefab and entity. It is not
+        ///     possible
+        ///     to use string in <see cref="IComponentData" />. So we have to
+        ///     make
+        ///     use of something else. This property is casted to <c>int</c>
+        ///     during
+        ///     conversion, then set to <c>type</c> field of the underlying
+        ///     <see cref="PrefabComponent" />.
+        /// </summary>
+        [Tooltip(
+            "This is used to bridge between prefab and entity.\n"
+            + "This property is casted to int during conversion,\n"
+            + "then set to <c>type</c> field of the underlying PrefabComponent"
+        )]
+        public PrefabTypes type;
 
         public void Convert(
             Entity entity,
@@ -22,9 +44,9 @@ namespace eidng8.SpaceFlight.Authoring
         ) {
             if (null == this.prefab) { return; }
 
-            PrefabComponent data = new PrefabComponent() {
+            PrefabComponent data = new PrefabComponent {
                 type = (int)this.type,
-                prefab = conversionSystem.GetPrimaryEntity(this.prefab),
+                prefab = conversionSystem.GetPrimaryEntity(this.prefab)
             };
             dstManager.AddComponentData(entity, data);
         }
