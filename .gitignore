@@ -17,6 +17,7 @@ Temp/
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
+[Ee]ntityCache/
 /[Ll]ibrary/
 [Ll]ogs/
 [Rr]elease/
