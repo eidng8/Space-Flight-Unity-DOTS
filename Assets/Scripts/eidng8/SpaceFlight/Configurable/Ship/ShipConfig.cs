@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using eidng8.SpaceFlight.Laws;
+using eidng8.SpaceFlight.Managers;
 using UnityEngine;
 
 
@@ -25,16 +26,15 @@ namespace eidng8.SpaceFlight.Configurable.Ship
     public class ShipConfig : ObjectConfigurable
     {
         /// <summary>List of all installed components.</summary>
+        [Header("Ship Attributes")]
         [Tooltip("List of all installed components.")]
         public ComponentConfig[] components;
 
         /// <summary>Prefab used to render the ship.</summary>
         [Tooltip("Prefab used to render the ship.")]
-        public GameObject prefab;
-        // public Objects.Movable.Ship prefab;
+        public PrefabTypes prefabType;
 
         /// <summary>Space available for component installation.</summary>
-        [Header("Ship Attributes")]
         [Tooltip("Space available for component installation.")]
         public float size;
 
@@ -124,7 +124,8 @@ namespace eidng8.SpaceFlight.Configurable.Ship
             return errors.Where(e => e.Length > 0).ToArray();
         }
 
-        private string ValidatePrefab() =>
-            null == this.prefab ? "Prefab is not set." : "";
+        private string ValidatePrefab() {
+            return 0 == this.prefabType ? "Prefab is not set." : "";
+        }
     }
 }
