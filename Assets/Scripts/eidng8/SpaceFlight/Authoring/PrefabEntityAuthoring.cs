@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using eidng8.SpaceFlight.Components;
+using eidng8.SpaceFlight.Managers;
 using Unity.Entities;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace eidng8.SpaceFlight.Authoring
     public class PrefabEntityAuthoring
         : MonoBehaviour, IDeclareReferencedPrefabs, IConvertGameObjectToEntity
     {
+        public PrefabTypes type;
+        
         public GameObject prefab;
 
         public void Convert(
@@ -20,6 +23,7 @@ namespace eidng8.SpaceFlight.Authoring
             if (null == this.prefab) { return; }
 
             PrefabComponent data = new PrefabComponent() {
+                type = (int)this.type,
                 prefab = conversionSystem.GetPrimaryEntity(this.prefab),
             };
             dstManager.AddComponentData(entity, data);

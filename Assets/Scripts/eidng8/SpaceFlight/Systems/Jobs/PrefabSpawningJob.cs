@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using eidng8.SpaceFlight.Components;
+using eidng8.SpaceFlight.Components.Tags;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -9,8 +10,10 @@ namespace eidng8.SpaceFlight.Systems.Jobs
 {
     public class PrefabSpawningJob : JobComponentSystem
     {
+        public const int QueueLength = 10;
+
         private static readonly List<PrefabComponent> Prefabs =
-            new List<PrefabComponent>(10);
+            new List<PrefabComponent>(PrefabSpawningJob.QueueLength);
 
         private EndSimulationEntityCommandBufferSystem _cmd;
 
@@ -20,9 +23,25 @@ namespace eidng8.SpaceFlight.Systems.Jobs
 
         private bool _spawning;
 
-        public static void Spawn(PrefabComponent prefab) {
+        public static void Spawn(PrefabComponent prefab, int count = 1) {
             lock (PrefabSpawningJob.Prefabs) {
-                PrefabSpawningJob.Prefabs.Add(prefab);
+                for (int i = 0; i < count; i++) {
+                    PrefabSpawningJob.Prefabs.Add(prefab);
+                }
+            }
+        }
+
+        public static void Spawn(IEnumerable<PrefabComponent> prefabs) {
+            lock (PrefabSpawningJob.Prefabs) {
+                PrefabSpawningJob.Prefabs.AddRange(prefabs);
+            }
+        }
+
+        public static void ResetQueue() {
+            lock (PrefabSpawningJob.Prefabs) {
+                PrefabSpawningJob.Prefabs.Clear();
+                PrefabSpawningJob.Prefabs.Capacity =
+                    PrefabSpawningJob.QueueLength;
             }
         }
 
@@ -47,10 +66,14 @@ namespace eidng8.SpaceFlight.Systems.Jobs
                 return default;
             }
 
-            this._lastBatch = new NativeArray<PrefabComponent>(
-                PrefabSpawningJob.Prefabs.ToArray(),
-                Allocator.TempJob
-            );
+            lock (PrefabSpawningJob.Prefabs) {
+                this._lastBatch = new NativeArray<PrefabComponent>(
+                    PrefabSpawningJob.Prefabs.ToArray(),
+                    Allocator.TempJob
+                );
+                PrefabSpawningJob.ResetQueue();
+            }
+
             Job job = new Job() {
                 cmd = this._cmd.CreateCommandBuffer().ToConcurrent(),
                 prefabs = this._lastBatch,
@@ -58,9 +81,8 @@ namespace eidng8.SpaceFlight.Systems.Jobs
             this._lastJob = job.Schedule(count, 1, dependsOn);
             this._cmd.AddJobHandleForProducer(this._lastJob);
 
-            PrefabSpawningJob.Prefabs.Clear();
             this._spawning = true;
-            
+
             return this._lastJob;
         }
 
@@ -72,9 +94,8 @@ namespace eidng8.SpaceFlight.Systems.Jobs
 
             public void Execute(int index) {
                 PrefabComponent prefab = this.prefabs[index];
-                for (int i = 0; i < 10; i++) {
-                    this.cmd.Instantiate(index, prefab.prefab);
-                }
+                Entity e = this.cmd.Instantiate(index, prefab.prefab);
+                this.cmd.AddComponent<JustSpawned>(index, e);
             }
         }
     }

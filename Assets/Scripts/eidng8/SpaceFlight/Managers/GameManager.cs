@@ -8,6 +8,7 @@
 // ---------------------------------------------------------------------------
 
 using System.IO;
+using eidng8.SpaceFlight.Authoring;
 using eidng8.SpaceFlight.Components;
 using eidng8.SpaceFlight.Configurable.Ship;
 using eidng8.SpaceFlight.Configurable.System;
@@ -16,6 +17,7 @@ using eidng8.SpaceFlight.Systems.Jobs;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace eidng8.SpaceFlight.Managers
 {
@@ -53,19 +55,17 @@ namespace eidng8.SpaceFlight.Managers
             return Path.Combine("Prefabs", file);
         }
 
-        public static void CreateShip() {
-            NativeArray<PrefabComponent> pc = World.Active.EntityManager
-                .CreateEntityQuery(
-                    new ComponentType[] {
-                        ComponentType.ReadOnly<PrefabComponent>()
-                    }
-                )
-                .ToComponentDataArray<PrefabComponent>(Allocator.TempJob);
-            foreach (PrefabComponent c in pc)
-            {
-                PrefabSpawningJob.Spawn(c);
-            }
-            // pc.Dispose();
+        public static void CreateShip(PrefabTypes type, int count = 1) {
+            EntityManager em = World.Active.EntityManager;
+            SpawnPrefab s = new SpawnPrefab() {
+                type = (int)type,
+                count = count,
+            };
+            EntityArchetype t = em.CreateArchetype(
+                ComponentType.ReadWrite<SpawnPrefab>()
+            );
+            Entity e = em.CreateEntity(t);
+            em.SetComponentData(e, s);
         }
 
         /// <summary>Path to the file in the persistent storage.</summary>

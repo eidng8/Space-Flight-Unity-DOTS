@@ -24,10 +24,10 @@ MonoBehaviour:
     SharedComponentCount: 8
     BoundingVolume:
       Min:
-        x: -9.114369
-        y: -14.637469
-        z: 5.9099402
+        x: 99995.5
+        y: 99995.5
+        z: 99995.5
       Max:
-        x: 1.3861294
-        y: -4.137456
-        z: 16.40994
+        x: 100006
+        y: 100006
+        z: 100006
