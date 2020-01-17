@@ -31,12 +31,6 @@ namespace eidng8.SpaceFlight.Systems.Jobs
             }
         }
 
-        public static void Spawn(IEnumerable<PrefabComponent> prefabs) {
-            lock (PrefabSpawningJob.Prefabs) {
-                PrefabSpawningJob.Prefabs.AddRange(prefabs);
-            }
-        }
-
         public static void ResetQueue() {
             lock (PrefabSpawningJob.Prefabs) {
                 PrefabSpawningJob.Prefabs.Clear();
