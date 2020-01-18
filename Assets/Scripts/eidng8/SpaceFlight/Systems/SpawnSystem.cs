@@ -13,7 +13,7 @@ namespace eidng8.SpaceFlight.Systems
     /// </summary>
     public class SpawnSystem : ComponentSystem
     {
-        public static bool UseCache = true;
+        public static bool UseCache = false;
 
         private bool _cached;
 
@@ -63,6 +63,10 @@ namespace eidng8.SpaceFlight.Systems
                         this.EntityManager.DestroyEntity(entity);
                     }
                 );
+
+            if (!this._cached) {
+                prefabs.Dispose();
+            }
         }
 
         protected override void OnDestroy() {
@@ -74,8 +78,12 @@ namespace eidng8.SpaceFlight.Systems
         }
 
         private NativeArray<PrefabComponent> GetPrefabs() {
-            if (this._cached && this._cache.Length > 0) {
-                return this._cache;
+            if (this._cached) {
+                if (this._cache.Length > 0) {
+                    return this._cache;
+                }
+
+                this._cache.Dispose();
             }
 
             NativeArray<PrefabComponent> a = this.Entities
