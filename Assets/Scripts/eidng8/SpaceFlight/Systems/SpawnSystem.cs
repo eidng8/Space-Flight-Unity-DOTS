@@ -74,7 +74,7 @@ namespace eidng8.SpaceFlight.Systems
         }
 
         private NativeArray<PrefabComponent> GetPrefabs() {
-            if (this._cached) {
+            if (this._cached && this._cache.Length > 0) {
                 return this._cache;
             }
 
