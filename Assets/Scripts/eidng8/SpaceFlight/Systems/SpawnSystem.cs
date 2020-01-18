@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using eidng8.SpaceFlight.Components;
+﻿using eidng8.SpaceFlight.Components;
 using eidng8.SpaceFlight.Managers;
 using eidng8.SpaceFlight.Systems.Jobs;
 using Unity.Collections;
@@ -40,6 +38,7 @@ namespace eidng8.SpaceFlight.Systems
         }
 
         protected override void OnUpdate() {
+            NativeArray<PrefabComponent> prefabs = this.GetPrefabs();
             // A temporary entity array is generated inside query builder's
             // `ForEach()` method. We are actually iterating over that temporary
             // array here. So it should be OK to destroy the entity inside
@@ -50,16 +49,17 @@ namespace eidng8.SpaceFlight.Systems
                         SpawnPrefab s = this.EntityManager
                             .GetComponentData<SpawnPrefab>(entity);
                         if (s.count <= 0) {
+                            this.EntityManager.DestroyEntity(entity);
                             return;
                         }
 
-                        foreach (PrefabComponent c in this.GetPrefabs()) {
+                        foreach (PrefabComponent c in prefabs) {
                             if (c.type == s.type) {
                                 PrefabSpawningJob.Spawn(c, s.count);
                                 break;
                             }
                         }
-                        
+
                         this.EntityManager.DestroyEntity(entity);
                     }
                 );
