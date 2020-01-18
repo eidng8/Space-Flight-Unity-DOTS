@@ -7,7 +7,7 @@ namespace eidng8.SpaceFlight
     public class UI : MonoBehaviour
     {
         public void Spawn() {
-            SpawnSystem.SpawnPrefab(PrefabTypes.Crosair, 100);
+            PrefabCacheManager.Instantiate(PrefabTypes.Crosair, 100);
         }
     }
 }
