@@ -5,14 +5,17 @@ using Unity.Entities;
 
 namespace eidng8.SpaceFlight.Managers
 {
+    /// <todo>
+    ///     Implement a caching mechanism for <see cref="GetPrefabs()" />.
+    /// </todo>
     public class PrefabCacheManager
     {
         private static readonly PrefabCacheManager Instance =
             new PrefabCacheManager();
 
-        protected static PrefabCacheManager M => PrefabCacheManager.Instance;
-
         private PrefabCacheManager() { }
+
+        protected static PrefabCacheManager M => PrefabCacheManager.Instance;
 
         /// <summary>
         ///     Spawn the specified prefab.
