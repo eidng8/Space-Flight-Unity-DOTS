@@ -228,6 +228,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8710237310792268650, guid: ed9529f723439eb4a8eb094e611c98b9,
+        type: 3}
+      propertyPath: m_LinearDamping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710237310792268650, guid: ed9529f723439eb4a8eb094e611c98b9,
+        type: 3}
+      propertyPath: m_AngularDamping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710237310792268650, guid: ed9529f723439eb4a8eb094e611c98b9,
+        type: 3}
+      propertyPath: m_GravityFactor
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710237310792268650, guid: ed9529f723439eb4a8eb094e611c98b9,
+        type: 3}
+      propertyPath: m_Mass
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8710237310792268653, guid: ed9529f723439eb4a8eb094e611c98b9,
         type: 3}
       propertyPath: m_Name

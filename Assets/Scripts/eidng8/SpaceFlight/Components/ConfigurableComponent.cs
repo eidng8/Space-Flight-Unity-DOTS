@@ -7,6 +7,8 @@ namespace eidng8.SpaceFlight.Components
 {
     public struct ConfigurableComponent : IComponentData
     {
+        public float mass;
+
         public readonly bool hasDefense;
         public DefenseComponent defense;
 
@@ -20,6 +22,7 @@ namespace eidng8.SpaceFlight.Components
         public PropulsionComponent propulsion;
 
         public ConfigurableComponent(IConfigurable cfg) {
+            this.mass = default;
             this.hasDefense = false;
             this.defense = default;
             this.hasOffense = false;
@@ -29,7 +32,12 @@ namespace eidng8.SpaceFlight.Components
             this.hasPropulsion = false;
             this.propulsion = default;
 
+            float v;
             Dictionary<string, float> dict = cfg.Aggregate();
+            if (dict.TryGetValue("mass", out v)) {
+                this.mass = v;
+            }
+
             this.hasPropulsion = this.ParsePropulsion(dict);
         }
 

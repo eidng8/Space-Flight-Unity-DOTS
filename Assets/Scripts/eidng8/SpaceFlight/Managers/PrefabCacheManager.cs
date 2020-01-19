@@ -1,39 +1,29 @@
-﻿using System;
-using eidng8.SpaceFlight.Components;
+﻿using eidng8.SpaceFlight.Components;
 using eidng8.SpaceFlight.Components.Tags;
 using eidng8.SpaceFlight.Configurable;
 using eidng8.SpaceFlight.Systems.Jobs;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Physics;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace eidng8.SpaceFlight.Managers
 {
-    /// <todo>
-    ///     Implement a caching mechanism for <see cref="GetPrefabs()" />.
-    /// </todo>
     public static class PrefabCacheManager
     {
-        public static Action<World> cleanup;
+        private static bool _cached;
 
-        private static bool _worldReady;
-
-        private static World _world;
+        private static NativeArray<PrefabComponent> _cache;
 
         static PrefabCacheManager() {
-            PrefabCacheManager.cleanup += delegate { };
-            GameManager.beforeSceneLoad += PrefabCacheManager.ClearWorld;
-            SceneManager.sceneLoaded += PrefabCacheManager.SetupWorld;
-            PrefabCacheManager.CreateWorld();
-        }
+            SceneManager.sceneUnloaded += delegate {
+                if (!PrefabCacheManager._cached) { return; }
 
-        /// <summary>
-        ///     Spawn the specified prefab.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="count"></param>
-        public static void Instantiate(PrefabTypes type, int count = 1) {
-            PrefabCacheManager.Spawn(type, count);
+                PrefabCacheManager._cache.Dispose();
+                PrefabCacheManager._cached = false;
+                Debug.Log("PrefabCacheManager.sceneUnloaded");
+            };
         }
 
         /// <summary>
@@ -42,122 +32,109 @@ namespace eidng8.SpaceFlight.Managers
         /// <param name="type"></param>
         /// <param name="cfg"></param>
         /// <param name="count"></param>
-        public static void Instantiate(
+        public static bool Instantiate(
             PrefabTypes type,
-            IConfigurable cfg,
-            int count = 1
+            int count = 1,
+            IConfigurable cfg = null
         ) {
-            PrefabCacheManager.Spawn(type, cfg, count);
-        }
+            NativeArray<PrefabComponent> prefabs =
+                PrefabCacheManager.GetPrefabs();
+            NativeArray<Entity> entities =
+                new NativeArray<Entity>(count, Allocator.TempJob);
+            bool spawned = PrefabCacheManager
+                .SpawnPrefab(prefabs, (int)type, entities, cfg);
 
-        private static void CreateWorld() {
-            PlayerLoopManager.RegisterDomainUnload(
-                PrefabCacheManager.DisposeWorld,
-                10000
-            );
-            PrefabCacheManager._world = new World("Entity Creation");
-            PrefabCacheManager._world.CreateSystem<PrefabSpawningJob>();
-            ScriptBehaviourUpdateOrder.UpdatePlayerLoop(
-                PrefabCacheManager._world
-            );
-            PrefabCacheManager._worldReady = true;
-        }
-
-        private static void ClearWorld() {
-            if (!PrefabCacheManager._worldReady) { return; }
-
-            PrefabCacheManager.cleanup.Invoke(PrefabCacheManager._world);
-            EntityManager em = PrefabCacheManager._world.EntityManager;
-            EntityQuery query = em.CreateEntityQuery(
-                ComponentType.ReadOnly<PrefabComponent>()
-            );
-            em.DestroyEntity(query);
-        }
-
-        private static void SetupWorld(Scene scene, LoadSceneMode mode) {
-            if (null == World.Active) { return; }
-
-            EntityManager aem = World.Active.EntityManager;
-            NativeArray<EntityRemapUtility.EntityRemapInfo> map =
-                aem.CreateEntityRemapArray(Allocator.Temp);
-        }
-
-        private static void DisposeWorld() {
-            if (PrefabCacheManager._worldReady) {
-                PrefabCacheManager._world.Dispose();
+            if (!spawned) {
+                prefabs = PrefabCacheManager.GetPrefabs(true);
+                spawned = PrefabCacheManager
+                    .SpawnPrefab(prefabs, (int)type, entities, cfg);
             }
+
+            entities.Dispose();
+            return spawned;
         }
 
-        private static void Spawn(PrefabTypes type, int count = 1) {
-            NativeArray<PrefabComponent> prefabs =
-                PrefabCacheManager.GetPrefabs();
-            PrefabCacheManager.SpawnPrefab(prefabs, (int)type, count);
-            PrefabCacheManager.DisposeQuery(prefabs);
-        }
-
-        private static void Spawn(
-            PrefabTypes type,
-            IConfigurable cfg,
-            int count = 1
+        private static NativeArray<PrefabComponent> GetPrefabs(
+            bool flush = false
         ) {
-            NativeArray<PrefabComponent> prefabs =
-                PrefabCacheManager.GetPrefabs();
-            PrefabCacheManager.SpawnPrefab(prefabs, (int)type, cfg, count);
-            PrefabCacheManager.DisposeQuery(prefabs);
-        }
+            if (!flush && PrefabCacheManager._cached) {
+                return PrefabCacheManager._cache;
+            }
 
-        private static NativeArray<PrefabComponent> GetPrefabs() {
-            return World.Active.EntityManager
+            if (PrefabCacheManager._cached) {
+                PrefabCacheManager._cache.Dispose();
+            }
+
+            PrefabCacheManager._cache = World.Active.EntityManager
                 .CreateEntityQuery(ComponentType.ReadOnly<PrefabComponent>())
-                .ToComponentDataArray<PrefabComponent>(Allocator.TempJob);
+                .ToComponentDataArray<PrefabComponent>(Allocator.Persistent);
+            PrefabCacheManager._cached = true;
+
+            return PrefabCacheManager._cache;
         }
 
-        private static void SpawnPrefab(
+        private static bool SpawnPrefab(
             NativeArray<PrefabComponent> prefabs,
             int type,
-            int count
+            NativeArray<Entity> entities,
+            IConfigurable cfg
         ) {
             foreach (PrefabComponent c in prefabs) {
-                if (c.type != type) {
-                    continue;
-                }
-
-                PrefabSpawningJob.Request request =
-                    new PrefabSpawningJob.Request {
-                        prefab = c.prefab
-                    };
-                PrefabSpawningJob.Spawn(request, count);
-                return;
-            }
-        }
-
-        private static void SpawnPrefab(
-            NativeArray<PrefabComponent> prefabs,
-            int type,
-            IConfigurable cfg,
-            int count
-        ) {
-            foreach (PrefabComponent c in prefabs) {
-                if (c.type != type) {
-                    continue;
-                }
+                if (c.type != type) { continue; }
 
                 EntityManager em = World.Active.EntityManager;
-                Entity e = em.Instantiate(c.prefab);
-                em.AddComponent<JustSpawned>(e);
-                // PrefabSpawningJob.Request request =
-                //     new PrefabSpawningJob.Request {
-                //         prefab = c.prefab,
-                //         hasConfig = true,
-                //         config = new ConfigurableComponent(cfg)
-                //     };
-                // PrefabSpawningJob.Spawn(request, count);
-                return;
+                em.Instantiate(c.prefab, entities);
+                em.AddComponent<JustSpawned>(entities);
+                if (null != cfg) {
+                    PrefabCacheManager.SetupPrefab(entities, cfg);
+                }
+
+                return true;
             }
+
+            return false;
         }
 
-        private static void DisposeQuery(NativeArray<PrefabComponent> prefabs) {
-            prefabs.Dispose();
+        private static void SetupPrefab(
+            NativeArray<Entity> entities,
+            IConfigurable cfg
+        ) {
+            EntityManager em = World.Active.EntityManager;
+            ConfigurableComponent component = new ConfigurableComponent(cfg);
+
+            foreach (Entity entity in entities) {
+                PhysicsMass mass = em.GetComponentData<PhysicsMass>(entity);
+                mass.InverseMass = component.mass;
+                em.SetComponentData(entity, mass);
+            }
+
+            if (component.hasPropulsion) {
+                em.AddComponent<PropulsionComponent>(entities);
+                foreach (Entity entity in entities) {
+                    em.SetComponentData(entity, component.propulsion);
+                }
+            }
+
+            if (component.hasDefense) {
+                em.AddComponent<DefenseComponent>(entities);
+                foreach (Entity entity in entities) {
+                    em.SetComponentData(entity, component.defense);
+                }
+            }
+
+            if (component.hasOffense) {
+                em.AddComponent<OffenseComponent>(entities);
+                foreach (Entity entity in entities) {
+                    em.SetComponentData(entity, component.offense);
+                }
+            }
+
+            if (component.hasPower) {
+                em.AddComponent<PowerComponent>(entities);
+                foreach (Entity entity in entities) {
+                    em.SetComponentData(entity, component.power);
+                }
+            }
         }
     }
 }

@@ -15,8 +15,8 @@ namespace Scenes.Space
                 GameManager.DataFilePath("Ships/Crosair"));
             PrefabCacheManager.Instantiate(
                 PrefabTypes.Crosair,
-                cfg,
-                int.Parse(quantityLabel.text)
+                int.Parse(quantityLabel.text),
+                cfg
             );
         }
 
