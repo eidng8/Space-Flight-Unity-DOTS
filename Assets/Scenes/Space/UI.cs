@@ -1,8 +1,9 @@
-﻿using eidng8.SpaceFlight.Managers;
+﻿using eidng8.SpaceFlight.Configurable.Ship;
+using eidng8.SpaceFlight.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace eidng8.SpaceFlight
+namespace Scenes.Space
 {
     public class UI : MonoBehaviour
     {
@@ -10,8 +11,11 @@ namespace eidng8.SpaceFlight
 
         public void Spawn()
         {
+            var cfg = Resources.Load<ShipConfig>(
+                GameManager.DataFilePath("Ships/Crosair"));
             PrefabCacheManager.Instantiate(
                 PrefabTypes.Crosair,
+                cfg,
                 int.Parse(quantityLabel.text)
             );
         }

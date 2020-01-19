@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using eidng8.SpaceFlight.Components;
-using eidng8.SpaceFlight.Components.Tags;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Entities;
-using Unity.Jobs;
+﻿using Unity.Entities;
 
 namespace eidng8.SpaceFlight.Systems.Jobs
 {
@@ -18,7 +12,7 @@ namespace eidng8.SpaceFlight.Systems.Jobs
             base.OnCreate();
         }
 
-        protected virtual EntityCommandBuffer.Concurrent GetCommandBuffer() {
+        protected virtual EntityCommandBuffer.Concurrent CreateCommandBuffer() {
             return this.mCmd.CreateCommandBuffer().ToConcurrent();
         }
     }

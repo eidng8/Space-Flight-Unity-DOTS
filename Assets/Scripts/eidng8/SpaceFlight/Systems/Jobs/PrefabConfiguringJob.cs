@@ -10,7 +10,7 @@ namespace eidng8.SpaceFlight.Systems.Jobs
     public class PrefabConfiguringJob : JobSystemWithCommandBuffer
     {
         protected override JobHandle OnUpdate(JobHandle dependsOn) {
-            Job job = new Job() {cmd = this.GetCommandBuffer()};
+            Job job = new Job {cmd = this.CreateCommandBuffer()};
             JobHandle h = job.Schedule(this, dependsOn);
             this.mCmd.AddJobHandleForProducer(h);
             return h;
