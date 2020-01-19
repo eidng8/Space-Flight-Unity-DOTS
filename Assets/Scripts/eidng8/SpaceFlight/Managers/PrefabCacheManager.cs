@@ -1,22 +1,31 @@
-﻿using eidng8.SpaceFlight.Components;
+﻿using System;
+using eidng8.SpaceFlight.Components;
+using eidng8.SpaceFlight.Components.Tags;
 using eidng8.SpaceFlight.Configurable;
 using eidng8.SpaceFlight.Systems.Jobs;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine.SceneManagement;
 
 namespace eidng8.SpaceFlight.Managers
 {
     /// <todo>
     ///     Implement a caching mechanism for <see cref="GetPrefabs()" />.
     /// </todo>
-    public class PrefabCacheManager
+    public static class PrefabCacheManager
     {
-        private static readonly PrefabCacheManager Instance =
-            new PrefabCacheManager();
+        public static Action<World> cleanup;
 
-        private PrefabCacheManager() { }
+        private static bool _worldReady;
 
-        protected static PrefabCacheManager M => PrefabCacheManager.Instance;
+        private static World _world;
+
+        static PrefabCacheManager() {
+            PrefabCacheManager.cleanup += delegate { };
+            GameManager.beforeSceneLoad += PrefabCacheManager.ClearWorld;
+            SceneManager.sceneLoaded += PrefabCacheManager.SetupWorld;
+            PrefabCacheManager.CreateWorld();
+        }
 
         /// <summary>
         ///     Spawn the specified prefab.
@@ -24,7 +33,7 @@ namespace eidng8.SpaceFlight.Managers
         /// <param name="type"></param>
         /// <param name="count"></param>
         public static void Instantiate(PrefabTypes type, int count = 1) {
-            PrefabCacheManager.M.Spawn(type, count);
+            PrefabCacheManager.Spawn(type, count);
         }
 
         /// <summary>
@@ -38,32 +47,72 @@ namespace eidng8.SpaceFlight.Managers
             IConfigurable cfg,
             int count = 1
         ) {
-            PrefabCacheManager.M.Spawn(type, cfg, count);
+            PrefabCacheManager.Spawn(type, cfg, count);
         }
 
-        protected virtual void Spawn(PrefabTypes type, int count = 1) {
-            NativeArray<PrefabComponent> prefabs = this.GetPrefabs();
-            this.SpawnPrefab(prefabs, (int)type, count);
-            this.DisposeQuery(prefabs);
+        private static void CreateWorld() {
+            PlayerLoopManager.RegisterDomainUnload(
+                PrefabCacheManager.DisposeWorld,
+                10000
+            );
+            PrefabCacheManager._world = new World("Entity Creation");
+            PrefabCacheManager._world.CreateSystem<PrefabSpawningJob>();
+            ScriptBehaviourUpdateOrder.UpdatePlayerLoop(
+                PrefabCacheManager._world
+            );
+            PrefabCacheManager._worldReady = true;
         }
 
-        protected virtual void Spawn(
+        private static void ClearWorld() {
+            if (!PrefabCacheManager._worldReady) { return; }
+
+            PrefabCacheManager.cleanup.Invoke(PrefabCacheManager._world);
+            EntityManager em = PrefabCacheManager._world.EntityManager;
+            EntityQuery query = em.CreateEntityQuery(
+                ComponentType.ReadOnly<PrefabComponent>()
+            );
+            em.DestroyEntity(query);
+        }
+
+        private static void SetupWorld(Scene scene, LoadSceneMode mode) {
+            if (null == World.Active) { return; }
+
+            EntityManager aem = World.Active.EntityManager;
+            NativeArray<EntityRemapUtility.EntityRemapInfo> map =
+                aem.CreateEntityRemapArray(Allocator.Temp);
+        }
+
+        private static void DisposeWorld() {
+            if (PrefabCacheManager._worldReady) {
+                PrefabCacheManager._world.Dispose();
+            }
+        }
+
+        private static void Spawn(PrefabTypes type, int count = 1) {
+            NativeArray<PrefabComponent> prefabs =
+                PrefabCacheManager.GetPrefabs();
+            PrefabCacheManager.SpawnPrefab(prefabs, (int)type, count);
+            PrefabCacheManager.DisposeQuery(prefabs);
+        }
+
+        private static void Spawn(
             PrefabTypes type,
             IConfigurable cfg,
             int count = 1
         ) {
-            NativeArray<PrefabComponent> prefabs = this.GetPrefabs();
-            this.SpawnPrefab(prefabs, (int)type, cfg, count);
-            this.DisposeQuery(prefabs);
+            NativeArray<PrefabComponent> prefabs =
+                PrefabCacheManager.GetPrefabs();
+            PrefabCacheManager.SpawnPrefab(prefabs, (int)type, cfg, count);
+            PrefabCacheManager.DisposeQuery(prefabs);
         }
 
-        protected virtual NativeArray<PrefabComponent> GetPrefabs() {
+        private static NativeArray<PrefabComponent> GetPrefabs() {
             return World.Active.EntityManager
                 .CreateEntityQuery(ComponentType.ReadOnly<PrefabComponent>())
                 .ToComponentDataArray<PrefabComponent>(Allocator.TempJob);
         }
 
-        protected virtual void SpawnPrefab(
+        private static void SpawnPrefab(
             NativeArray<PrefabComponent> prefabs,
             int type,
             int count
@@ -82,7 +131,7 @@ namespace eidng8.SpaceFlight.Managers
             }
         }
 
-        protected virtual void SpawnPrefab(
+        private static void SpawnPrefab(
             NativeArray<PrefabComponent> prefabs,
             int type,
             IConfigurable cfg,
@@ -93,20 +142,21 @@ namespace eidng8.SpaceFlight.Managers
                     continue;
                 }
 
-                PrefabSpawningJob.Request request =
-                    new PrefabSpawningJob.Request {
-                        prefab = c.prefab,
-                        hasConfig = true,
-                        config = new ConfigurableComponent(cfg)
-                    };
-                PrefabSpawningJob.Spawn(request, count);
+                EntityManager em = World.Active.EntityManager;
+                Entity e = em.Instantiate(c.prefab);
+                em.AddComponent<JustSpawned>(e);
+                // PrefabSpawningJob.Request request =
+                //     new PrefabSpawningJob.Request {
+                //         prefab = c.prefab,
+                //         hasConfig = true,
+                //         config = new ConfigurableComponent(cfg)
+                //     };
+                // PrefabSpawningJob.Spawn(request, count);
                 return;
             }
         }
 
-        protected virtual void DisposeQuery(
-            NativeArray<PrefabComponent> prefabs
-        ) {
+        private static void DisposeQuery(NativeArray<PrefabComponent> prefabs) {
             prefabs.Dispose();
         }
     }

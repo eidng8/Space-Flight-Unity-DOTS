@@ -7,6 +7,7 @@
 // </summary>
 // ---------------------------------------------------------------------------
 
+using System;
 using System.IO;
 using eidng8.SpaceFlight.Configurable.System;
 using UnityEngine;
@@ -20,6 +21,12 @@ namespace eidng8.SpaceFlight.Managers
     /// </summary>
     public static class GameManager
     {
+        public static Action beforeSceneLoad;
+
+        static GameManager() {
+            GameManager.beforeSceneLoad += delegate { };
+        }
+
         public static StartupConfig StartupConfig =>
             Resources.Load<StartupConfig>(
                 GameManager.DataFilePath("Startup Config")
@@ -54,13 +61,13 @@ namespace eidng8.SpaceFlight.Managers
             return Path.Combine(Application.persistentDataPath, "Player");
         }
 
-        /// <summary>Sets up the scene after the scene has been loaded.</summary>
-        [RuntimeInitializeOnLoadMethod(
-            RuntimeInitializeLoadType.AfterSceneLoad
-        )]
-        private static void LateSetupScene() {
-            Debug.Log($"LateSetupScene {Time.realtimeSinceStartup}");
-        }
+        // <summary>Sets up the scene after the scene has been loaded.</summary>
+        // [RuntimeInitializeOnLoadMethod(
+        //     RuntimeInitializeLoadType.AfterSceneLoad
+        // )]
+        // private static void LateSetupScene() {
+        //     Debug.Log($"LateSetupScene {Time.realtimeSinceStartup}");
+        // }
 
         /// <summary>
         ///     Fetches game state from persistent storage or network server.
@@ -74,8 +81,9 @@ namespace eidng8.SpaceFlight.Managers
         [RuntimeInitializeOnLoadMethod(
             RuntimeInitializeLoadType.BeforeSceneLoad
         )]
-        private static void SetupScene() {
+        private static void EarlySetupScene() {
             Debug.Log($"SetupScene {Time.realtimeSinceStartup}");
+            GameManager.beforeSceneLoad.Invoke();
         }
     }
 }
