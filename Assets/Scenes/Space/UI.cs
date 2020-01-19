@@ -8,15 +8,17 @@ namespace eidng8.SpaceFlight
     {
         public Text quantityLabel;
 
-        public void Spawn() {
+        public void Spawn()
+        {
             PrefabCacheManager.Instantiate(
                 PrefabTypes.Crosair,
-                int.Parse(this.quantityLabel.text)
+                int.Parse(quantityLabel.text)
             );
         }
 
-        public void QuantityChanged(float value) {
-            this.quantityLabel.text = $"{(int)value}";
+        public void QuantityChanged(float value)
+        {
+            quantityLabel.text = $"{(int) value}";
         }
     }
 }
