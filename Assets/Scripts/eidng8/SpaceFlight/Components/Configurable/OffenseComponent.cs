@@ -1,7 +1,6 @@
 ﻿using Unity.Entities;
-using Unity.Mathematics;
 
-namespace eidng8.SpaceFlight.Components
+namespace eidng8.SpaceFlight.Components.Configurable
 {
     public struct OffenseComponent : IComponentData
     {

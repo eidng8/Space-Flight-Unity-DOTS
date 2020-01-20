@@ -1,6 +1,6 @@
 ﻿using System;
 using eidng8.SpaceFlight.Components;
-using eidng8.SpaceFlight.Components.Tags;
+using eidng8.SpaceFlight.Components.Configurable;
 using eidng8.SpaceFlight.Configurable;
 using eidng8.SpaceFlight.Laws;
 using Unity.Collections;
@@ -29,6 +29,13 @@ namespace eidng8.SpaceFlight.Managers
     /// </remarks>
     public static class PrefabManager
     {
+        /// <summary>
+        ///     Delegates to be invoked when new entities were created.
+        ///     Components
+        ///     supported by <see cref="ConfigurableComponent" /> are
+        ///     automatically
+        ///     added to entities on creation.
+        /// </summary>
         public static Action<NativeArray<Entity>> entityCreated;
 
         private static bool _cached;
@@ -53,13 +60,11 @@ namespace eidng8.SpaceFlight.Managers
         }
 
         /// <summary>
-        ///     Spawn the specified prefab, and add necessary components to
-        ///     newly
-        ///     created entities, including configuration components and the
-        ///     <see cref="JustSpawned" /> tag component. Please note that if
-        ///     <see cref="cfg" /> is null, then no configuration component
-        ///     will be
-        ///     added to entities.
+        ///     Spawn the specified prefab, and add configuration components to
+        ///     newly created entities. Please note that if<see cref="cfg" />
+        ///     is
+        ///     null, then no configuration component will be added to
+        ///     entities.
         /// </summary>
         /// <param name="type">type of prefab</param>
         /// <param name="count">number of entities to instantiate</param>
@@ -119,10 +124,7 @@ namespace eidng8.SpaceFlight.Managers
         }
 
         /// <summary>
-        ///     Actually spawning the prefab, and add necessary components to
-        ///     newly
-        ///     created entities, including configuration components and the
-        ///     <see cref="JustSpawned" /> tag component.
+        ///     Actually spawning the prefab.
         /// </summary>
         /// <param name="type"></param>
         /// <param name="entities"></param>
@@ -138,9 +140,6 @@ namespace eidng8.SpaceFlight.Managers
 
             EntityManager em = World.Active.EntityManager;
             em.Instantiate(PrefabManager._cache[idx].prefab, entities);
-
-            // Add the tag component so others can work on them specifically.
-            em.AddComponent<JustSpawned>(entities);
 
             // Configures the entities if provided
             if (null != cfg) {
@@ -179,10 +178,10 @@ namespace eidng8.SpaceFlight.Managers
                 }
             }
 
-            if (component.hasOffense) {
-                em.AddComponent<OffenseComponent>(entities);
+            if (component.hasEnergy) {
+                em.AddComponent<EnergyComponent>(entities);
                 foreach (Entity entity in entities) {
-                    em.SetComponentData(entity, component.offense);
+                    em.SetComponentData(entity, component.energy);
                 }
             }
 

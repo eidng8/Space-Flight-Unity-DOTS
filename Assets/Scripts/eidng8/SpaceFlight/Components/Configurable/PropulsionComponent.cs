@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-namespace eidng8.SpaceFlight.Components
+namespace eidng8.SpaceFlight.Components.Configurable
 {
     /// <summary>
     ///     Anything that can move should has this component attached to
