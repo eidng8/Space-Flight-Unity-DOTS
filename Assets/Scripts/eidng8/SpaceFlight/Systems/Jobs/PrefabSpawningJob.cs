@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using eidng8.SpaceFlight.Components;
+using eidng8.SpaceFlight.Managers;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -10,7 +11,7 @@ namespace eidng8.SpaceFlight.Systems.Jobs
     /// <summary>
     ///     The job scheduler for spawning prefab entities. This is for use
     ///     in conjunction with
-    ///     <see cref="eidng8.SpaceFlight.Managers.PrefabCacheManager" />.
+    ///     <see cref="PrefabManager" />.
     /// </summary>
     public class PrefabSpawningJob : JobSystemWithCommandBuffer
     {

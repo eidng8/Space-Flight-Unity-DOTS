@@ -13,11 +13,13 @@ namespace Scenes.Space
         {
             var cfg = Resources.Load<ShipConfig>(
                 GameManager.DataFilePath("Ships/Crosair"));
-            PrefabCacheManager.Instantiate(
+            var created = PrefabManager.Instantiate(
                 PrefabTypes.Crosair,
                 int.Parse(quantityLabel.text),
                 cfg
             );
+
+            if (!created) Debug.Log("Failed to create prefab");
         }
 
         public void QuantityChanged(float value)

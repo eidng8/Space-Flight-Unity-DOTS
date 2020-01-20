@@ -44,10 +44,10 @@ namespace eidng8.SpaceFlight.Authoring
         ) {
             if (null == this.prefab) { return; }
 
-            PrefabComponent data = new PrefabComponent {
-                type = (int)this.type,
-                prefab = conversionSystem.GetPrimaryEntity(this.prefab)
-            };
+            PrefabComponent data = new PrefabComponent(
+                this.type,
+                conversionSystem.GetPrimaryEntity(this.prefab)
+            );
             dstManager.AddComponentData(entity, data);
         }
 
