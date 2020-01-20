@@ -1,4 +1,5 @@
-﻿using eidng8.SpaceFlight.Components;
+﻿using System;
+using eidng8.SpaceFlight.Components;
 using eidng8.SpaceFlight.Components.Tags;
 using eidng8.SpaceFlight.Configurable;
 using eidng8.SpaceFlight.Laws;
@@ -28,6 +29,8 @@ namespace eidng8.SpaceFlight.Managers
     /// </remarks>
     public static class PrefabManager
     {
+        public static Action<NativeArray<Entity>> entityCreated;
+
         private static bool _cached;
 
         private static NativeArray<PrefabComponent> _cache;
@@ -39,6 +42,14 @@ namespace eidng8.SpaceFlight.Managers
             // SceneManager.sceneUnloaded += delegate {
             //     GameManager.beforeSceneLoad += PrefabCacheManager.ClearCache;
             // };
+
+            PrefabManager.entityCreated = delegate { };
+
+            // Make sure to clear up the cache when the app quit.
+            PlayerLoopManager.RegisterDomainUnload(
+                PrefabManager.ClearCache,
+                10000
+            );
         }
 
         /// <summary>
@@ -81,7 +92,10 @@ namespace eidng8.SpaceFlight.Managers
         }
 
         public static void ClearCache() {
-            if (!PrefabManager._cached) { return; }
+            if (!PrefabManager._cached) {
+                Debug.Log("Prefab cache is empty");
+                return;
+            }
 
             PrefabManager._cache.Dispose();
             PrefabManager._cached = false;
@@ -132,6 +146,8 @@ namespace eidng8.SpaceFlight.Managers
             if (null != cfg) {
                 PrefabManager.SetupPrefab(entities, cfg);
             }
+
+            PrefabManager.entityCreated.Invoke(entities);
 
             return true;
         }
