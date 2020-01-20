@@ -226,6 +226,12 @@ namespace eidng8.SpaceFlight.Laws
             where T : struct, IComparable<T> {
             int lower = 0;
             int upper = array.Length - 1;
+            if (0 == upper) {
+                if (array[0].Equals(search)) { return 0; }
+
+                return -1;
+            }
+
             // Rider suggests to use loop instead of a tail recursion,
             // which is reasonably well. Here we go.
             while (true) {
@@ -238,7 +244,7 @@ namespace eidng8.SpaceFlight.Laws
 
                 // If the element is present at the 
                 // middle itself 
-                if (array[mid].CompareTo(search) == 0) { return mid; }
+                if (array[mid].Equals(search)) { return mid; }
 
                 // If element is smaller than mid, then 
                 // it can only be present in lower sub-array 
