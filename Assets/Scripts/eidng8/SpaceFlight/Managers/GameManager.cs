@@ -10,10 +10,6 @@
 using System;
 using System.IO;
 using eidng8.SpaceFlight.Configurable.System;
-using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Physics;
-using Unity.Physics.Authoring;
 using UnityEngine;
 using UO = UnityEngine.Object;
 
@@ -26,13 +22,15 @@ namespace eidng8.SpaceFlight.Managers
     /// </summary>
     public static class GameManager
     {
-        public static Action beforeSceneLoad;
+        /// <summary>Called before the first scene were loaded.</summary>
+        public static Action beforeFirstSceneLoad;
 
-        public static Action afterSceneLoad;
+        /// <summary>Called after the first scene were loaded.</summary>
+        public static Action afterFirstSceneLoad;
 
         static GameManager() {
-            GameManager.beforeSceneLoad += delegate { };
-            GameManager.afterSceneLoad += delegate { };
+            GameManager.beforeFirstSceneLoad += delegate { };
+            GameManager.afterFirstSceneLoad += delegate { };
         }
 
         public static StartupConfig StartupConfig =>
@@ -85,22 +83,22 @@ namespace eidng8.SpaceFlight.Managers
         /// </summary>
         private static void SetupGameState() { }
 
-        /// <summary>Sets up the scene before the first scene were loaded.</summary>
+        /// <summary>Sets up before the first scene were loaded.</summary>
         [RuntimeInitializeOnLoadMethod(
             RuntimeInitializeLoadType.BeforeSceneLoad
         )]
         private static void EarlySetupScene() {
             Debug.Log($"EarlySetupScene {Time.realtimeSinceStartup}");
-            GameManager.beforeSceneLoad.Invoke();
+            GameManager.beforeFirstSceneLoad.Invoke();
         }
 
-        /// <summary>Sets up the scene after the first scene were loaded.</summary>
+        /// <summary>Sets up after the first scene were loaded.</summary>
         [RuntimeInitializeOnLoadMethod(
             RuntimeInitializeLoadType.AfterSceneLoad
         )]
         private static void LateSetupScene() {
             Debug.Log($"LateSetupScene {Time.realtimeSinceStartup}");
-            GameManager.afterSceneLoad.Invoke();
+            GameManager.afterFirstSceneLoad.Invoke();
         }
     }
 }
