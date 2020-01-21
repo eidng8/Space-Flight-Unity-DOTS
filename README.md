@@ -4,6 +4,8 @@
 
 Open `Assets/Scenes/Space/Startup.unity` and play.
 
+Current thought is to use one empty scene repeatedly and spawn everything on the fly.
+
 
 ### Problems met
 
