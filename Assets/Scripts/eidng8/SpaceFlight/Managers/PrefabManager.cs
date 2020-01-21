@@ -7,6 +7,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace eidng8.SpaceFlight.Managers
 {
@@ -43,12 +44,9 @@ namespace eidng8.SpaceFlight.Managers
         private static NativeArray<PrefabComponent> _cache;
 
         static PrefabManager() {
-            // Scene unloaded event may occur late in asynchronous situation.
-            // Before scene load event is better for guaranteeing a clean cache.
-            GameManager.beforeSceneLoad += PrefabManager.ClearCache;
-            // SceneManager.sceneUnloaded += delegate {
-            //     GameManager.beforeSceneLoad += PrefabCacheManager.ClearCache;
-            // };
+            SceneManager.sceneLoaded += delegate {
+                PrefabManager.ClearCache();
+            };
 
             PrefabManager.entityCreated = delegate { };
 

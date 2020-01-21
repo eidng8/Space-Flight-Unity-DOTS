@@ -1,6 +1,7 @@
 ﻿using eidng8.SpaceFlight.Configurable.Ship;
 using eidng8.SpaceFlight.Managers;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Scenes.Space
@@ -25,6 +26,11 @@ namespace Scenes.Space
         public void QuantityChanged(float value)
         {
             quantityLabel.text = $"{(int) value}";
+        }
+
+        public void SwitchScene()
+        {
+            SceneManager.LoadScene("Scenes/Space/Space");
         }
     }
 }
