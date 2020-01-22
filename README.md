@@ -11,6 +11,9 @@ everything. Other stuff in the repo are just samples and documents.
 It is not supposed to directly edit anything in this package. One could derive
 sub-class if needed. Or use various delegates to tap into processes.
 
+I also want to salvage my long forgotten maths & physics. So there are lots of grade
+school comments littering all over.
+
 
 ### Playing around
 
