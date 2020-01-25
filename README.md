@@ -64,8 +64,8 @@ The `Physics Body` has a bit more parameters can be tweaked  than the `GameObjec
 ##### Entity Conversion
 
 The `ConvertToEntity` component is a heavy duty task. The
- [`Crosair`](https://github.com/eidng8/Space-Flight-Unity/blob/278e03e11ebc2810bfe84ec449246ff671cb3796/Assets/Resources/Prefabs/Ships/Crosair.prefab)
-from the Space-Flight-Unity game object takes around 3.5 seconds to convert
+ [Crosair](https://github.com/eidng8/Space-Flight-Unity/blob/278e03e11ebc2810bfe84ec449246ff671cb3796/Assets/Resources/Prefabs/Ships/Crosair.prefab)
+game object from the Space-Flight-Unity takes around 3.5 seconds to convert
 on-the-fly. Although the conversion is a one-time process happens at the first time
 of instantiation. Working out a dozen game objects will freeze the game for quite a
 while.
