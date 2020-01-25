@@ -53,9 +53,13 @@ I count myself as a beginner. So I have a dedicated section here.
 ##### Moment of Inertia is a Vector3 tensor
 
 In Unity, moment of inertia is not a simple number. Instead, it is the inertia tensor
-in `Vector3` for `GameObject`, and `float3` for ECS `Physics Shape`.
-The `Physics Body` has a bit more parameters can be tweaked  than the `GameObject`'s
-`Rigigbody.inertiaTensor` counterpart.
+in `Vector3` (`Rigigbody.inertiaTensor`) for `GameObject`, and `float3` for ECS
+`Physics Shape`.
+
+In ECS, `Physics Body`, `Physics Mass` and `Physics Shape` replace the `Rigidbody`
+component. And they have a bit more parameters can be tweaked  than the `GameObject`'s
+`Rigigbody` counterpart. But do note that, such as `Physics Mass`, it's
+`inverseInertia`, though the underlying numbers are the same.
 
 
 
