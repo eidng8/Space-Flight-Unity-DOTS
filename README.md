@@ -63,11 +63,13 @@ The `Physics Body` has a bit more parameters can be tweaked  than the `GameObjec
 
 ##### Entity Conversion
 
-The `ConvertToEntity` component is a heavy duty task. The `Crosair` game object
-takes around 3.5 seconds to convert on-the-fly. Although the conversion is a
-one-time process happens at the first time of instantiation. Working out a dozen
-game objects will freeze the game for quite a while.
+The `ConvertToEntity` component is a heavy duty task. The
+ [`Crosair`](https://github.com/eidng8/Space-Flight-Unity/blob/278e03e11ebc2810bfe84ec449246ff671cb3796/Assets/Resources/Prefabs/Ships/Crosair.prefab)
+from the Space-Flight-Unity game object takes around 3.5 seconds to convert
+on-the-fly. Although the conversion is a one-time process happens at the first time
+of instantiation. Working out a dozen game objects will freeze the game for quite a
+while.
 
-This is the reason to always stick to sub-scenes. Place every prefab to a sub-scene
-saves a whole lot of runtime resources. Even those prefab doesn't require entity
-conversion, they'll benefit greatly from the sub-scene cache.
+This is the reason to always stick to sub-scenes. Placing prefabs to sub-scene saves
+a whole lot of runtime resources. Even prefabs not requiring entity conversion will
+benefit greatly from the sub-scene cache.
