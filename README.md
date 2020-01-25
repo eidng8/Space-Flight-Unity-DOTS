@@ -43,3 +43,31 @@ The `PhysicsStep` component is not destroyed after a scene were unloaded. Say tw
 scene (A & B) both have an entity with `PhysicsStep` component on them. When you
 switch from scene A to scene B using `SceneManager.LoadScene("B")`, the `PhysicsStep`
 from scene A will persist into scene B. Resulting in broken physics simulation.
+
+
+### Beginner's Notes
+
+I count myself as a beginner. So I have a dedicated section here.
+
+
+##### Moment of Inertia is a Vector3 tensor
+
+In Unity, moment of inertia is not a simple number. Instead, it is the inertia tensor
+in `Vector3` for `GameObject`, and `float3` for ECS `Physics Shape`.
+The `Physics Body` has a bit more parameters can be tweaked  than the `GameObject`'s
+`Rigigbody.inertiaTensor` counterpart.
+
+
+
+### General Notes
+
+##### Entity Conversion
+
+The `ConvertToEntity` component is a heavy duty task. The `Crosair` game object
+takes around 3.5 seconds to convert on-the-fly. Although the conversion is a
+one-time process happens at the first time of instantiation. Working out a dozen
+game objects will freeze the game for quite a while.
+
+This is the reason to always stick to sub-scenes. Place every prefab to a sub-scene
+saves a whole lot of runtime resources. Even those prefab doesn't require entity
+conversion, they'll benefit greatly from the sub-scene cache.
