@@ -77,3 +77,13 @@ while.
 This is the reason to always stick to sub-scenes. Placing prefabs to sub-scene saves
 a whole lot of runtime resources. Even prefabs not requiring entity conversion will
 benefit greatly from the sub-scene cache.
+
+
+
+### Temporary Problems
+
+* In 2019.3, the NetCode package has an error, so it is temporarily uninstalled.
+```
+Library\PackageCache\com.unity.netcode@0.0.4-preview.0\Runtime\ClientServerWorld\ClientServerBootstrap.cs(31,33):
+error CS1503: Argument 1: cannot convert from 'System.Collections.Generic.IReadOnlyList<System.Type>' to 'System.Collections.Generic.List<System.Type>'
+```

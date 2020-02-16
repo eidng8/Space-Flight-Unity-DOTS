@@ -50,11 +50,12 @@ namespace eidng8.SpaceFlight.Managers
 
             PrefabManager.entityCreated = delegate { };
 
+            // The following doesn't work since 2019.3
             // Make sure to clear up the cache when the app quit.
-            PlayerLoopManager.RegisterDomainUnload(
-                PrefabManager.ClearCache,
-                10000
-            );
+            // PlayerLoopManager.RegisterDomainUnload(
+            //     PrefabManager.ClearCache,
+            //     10000
+            // );
         }
 
         /// <summary>
@@ -114,7 +115,8 @@ namespace eidng8.SpaceFlight.Managers
             PrefabManager.ClearCache();
 
             // build a new cache, and sort it so we can use binary search later
-            PrefabManager._cache = World.Active.EntityManager
+            PrefabManager._cache = World.DefaultGameObjectInjectionWorld
+                .EntityManager
                 .CreateEntityQuery(ComponentType.ReadOnly<PrefabComponent>())
                 .ToComponentDataArray<PrefabComponent>(Allocator.Persistent);
             PrefabManager._cache.Sort();
@@ -136,7 +138,8 @@ namespace eidng8.SpaceFlight.Managers
             int idx = PrefabManager._cache.BinarySearch(type);
             if (idx < 0) { return false; }
 
-            EntityManager em = World.Active.EntityManager;
+            EntityManager em = World.DefaultGameObjectInjectionWorld
+                .EntityManager;
             em.Instantiate(PrefabManager._cache[idx].prefab, entities);
 
             // Configures the entities if provided
@@ -153,7 +156,8 @@ namespace eidng8.SpaceFlight.Managers
             NativeArray<Entity> entities,
             IConfigurable cfg
         ) {
-            EntityManager em = World.Active.EntityManager;
+            EntityManager em = World.DefaultGameObjectInjectionWorld
+                .EntityManager;
             ConfigurableComponent component = new ConfigurableComponent(cfg);
 
             foreach (Entity entity in entities) {
